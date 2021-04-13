@@ -1,0 +1,72 @@
+- name: build simple iot
+  run_once: true
+  become: false
+  delegate_to: 127.0.0.1
+  block:
+    - name: get simple iot source
+      git:
+        repo: "{{ siot_repo }}"
+        dest: "{{ siot_tmp }}"
+        force: yes
+        version: "{{ siot_version }}"
+      register: fetch
+    - name: remove all go binaries if source changed
+      # we need to remove all go binaries as they currently share one
+      # source repo, and we need to make sure they all get rebuilt
+      # if the source changes
+      file: path={{ siot_tmp }}/siot state=absent
+      when: fetch.changed
+    - name: check if binary exists
+      stat: path={{ siot_tmp }}/siot
+      register: binary
+    - name: install frontend deps
+      when: not binary.stat.exists
+      shell: |
+        cd {{ siot_tmp }}
+        source ./envsetup.sh
+        siot_setup
+    - name: compile
+      when: not binary.stat.exists
+      shell: |
+        cd {{ siot_tmp }}
+        source ./envsetup.sh
+        siot_build
+  rescue:
+    - name: clean siot binary because build failed
+      # there seems to be a bug where rescue does not use delegate_to from parent task
+      delegate_to: 127.0.0.1
+      file: path={{ siot_tmp }}/siot state=absent
+
+# we have to running as caddy2 user, assume user is already created by
+# caddy2 role
+- name: create siot group
+  group:
+    name: "{{ siot_user }}"
+  when: siot_user != "caddy2"
+
+- name: create siot user
+  user:
+    name: "{{ siot_user }}"
+    group: "{{ siot_user }}"
+    home: "{{ siot_data_dir }}"
+  when: siot_user != "caddy2"
+
+- name: Create directories
+  file: path={{ item }} state=directory owner={{ siot_user }} mode='0770'
+  with_items:
+    - "{{ siot_data_dir }}"
+
+- name: deploy siot
+  copy:
+    src={{ siot_tmp }}/siot dest={{ siot_bin_dir }}/{{ siot_binary }} mode=0755
+  notify:
+    - restart siot
+    - enable siot
+
+- name: install service file
+  template:
+    src=siot.service.j2 dest=/etc/systemd/system/{{ siot_binary }}.service
+  notify:
+    - reload systemd
+    - restart siot
+    - enable siot

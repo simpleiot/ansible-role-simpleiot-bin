@@ -1,0 +1,34 @@
+# we are on feature-flow-control-simple for now so we can
+# set control features
+siot_repo: https://github.com/simpleiot/simpleiot.git
+siot_version: master
+siot_binary: siot
+
+# recommend using a uuid for auth token. Can be generated
+# using the uuidgen utility (part of util-linux).
+# If left "", token auth will be disabled.
+siot_auth_token: ""
+siot_tmp: "{{ playbook_dir }}/tmp/{{ siot_binary }}"
+# siot_user must be set to caddy2 user if you want
+# re-use caddy's TLS certs for the embedded NATS
+# in SIOT
+siot_user: "{{ siot_binary }}"
+siot_domain: siot.xyz.com
+siot_data_dir: /home/{{ siot_binary }}
+siot_bin_dir: /usr/local/bin
+siot_port: 8080
+siot_nats_port: 4222
+siot_nats_http_port: 8222
+siot_nats_url: nats://localhost:{{ siot_nats_port }}
+siot_nats_tls_timeout: 30
+
+# influxdb config. Set siot_influx_url to "" to disable
+siot_influx_url: http://localhost:8086
+siot_influx_user: admin
+siot_influx_pass: fixme
+siot_influx_db: "{{ siot_binary }}"
+
+# twilio config -- set SID to "" to disable
+siot_twilio_sid: ""
+siot_twilio_auth_token: ""
+siot_twilio_from: "123-234-2342"

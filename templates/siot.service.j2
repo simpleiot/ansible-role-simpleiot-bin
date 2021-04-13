@@ -1,0 +1,46 @@
+[Unit]
+Description=Simple IoT server ({{ siot_binary }})
+Documentation=https://simpleiot.org
+After=network-online.target
+Wants=network-online.target systemd-networkd-wait-online.service
+
+[Service]
+Restart=always
+RestartSec=10
+
+Environment=SIOT_DATA={{ siot_data_dir }}
+Environment=SIOT_PORT={{ siot_port }}
+Environment=SIOT_AUTH_TOKEN={{ siot_auth_token }}
+
+Environment=SIOT_NATS_PORT={{ siot_nats_port }}
+Environment=SIOT_NATS_HTTP_PORT={{ siot_nats_http_port }}
+# below cannot be localhost because then certs fail
+Environment=SIOT_NATS_SERVER={{ siot_nats_url }}
+
+{% if siot_user == "caddy2" %}
+Environment=SIOT_NATS_TLS_CERT=/home/caddy2/.local/share/caddy/certificates/acme-v02.api.letsencrypt.org-directory/{{ siot_domain }}/{{ siot_domain }}.crt
+Environment=SIOT_NATS_TLS_KEY=/home/caddy2/.local/share/caddy/certificates/acme-v02.api.letsencrypt.org-directory/{{ siot_domain }}/{{ siot_domain }}.key
+Environment=SIOT_NATS_TLS_TIMEOUT={{ siot_nats_tls_timeout }}
+{% endif %}
+
+{% if siot_influx_url != "" %}
+Environment=SIOT_INFLUX_URL={{ siot_influx_url }}
+Environment=SIOT_INFLUX_USER={{ siot_influx_user }}
+Environment=SIOT_INFLUX_PASS={{ siot_influx_pass }}
+Environment=SIOT_INFLUX_DB={{ siot_influx_db }}
+{% endif %}
+
+{% if siot_twilio_sid != "" %}
+Environment=TWILIO_SID={{ siot_twilio_sid }}
+Environment=TWILIO_AUTH_TOKEN={{ siot_twilio_auth_token }}
+Environment=TWILIO_FROM={{ siot_twilio_from }}
+{% endif %}
+
+; User and group the process will run as.
+User={{ siot_user }}
+Group={{ siot_user }}
+
+ExecStart={{ siot_bin_dir }}/{{ siot_binary }}
+
+[Install]
+WantedBy=multi-user.target
