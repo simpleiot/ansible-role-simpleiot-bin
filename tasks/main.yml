@@ -1,42 +1,3 @@
-- name: build simple iot
-  run_once: true
-  become: false
-  delegate_to: 127.0.0.1
-  block:
-    - name: get simple iot source
-      git:
-        repo: "{{ siot_repo }}"
-        dest: "{{ siot_tmp }}"
-        force: yes
-        version: "{{ siot_version }}"
-      register: fetch
-    - name: remove all go binaries if source changed
-      # we need to remove all go binaries as they currently share one
-      # source repo, and we need to make sure they all get rebuilt
-      # if the source changes
-      file: path={{ siot_tmp }}/siot state=absent
-      when: fetch.changed
-    - name: check if binary exists
-      stat: path={{ siot_tmp }}/siot
-      register: binary
-    - name: install frontend deps
-      when: not binary.stat.exists
-      shell: |
-        cd {{ siot_tmp }}
-        source ./envsetup.sh
-        siot_setup
-    - name: compile
-      when: not binary.stat.exists
-      shell: |
-        cd {{ siot_tmp }}
-        source ./envsetup.sh
-        siot_build
-  rescue:
-    - name: clean siot binary because build failed
-      # there seems to be a bug where rescue does not use delegate_to from parent task
-      delegate_to: 127.0.0.1
-      file: path={{ siot_tmp }}/siot state=absent
-
 # we have to running as caddy2 user, assume user is already created by
 # caddy2 role
 - name: create siot group
@@ -56,9 +17,29 @@
   with_items:
     - "{{ siot_data_dir }}"
 
-- name: deploy siot
-  copy:
-    src={{ siot_tmp }}/siot dest={{ siot_bin_dir }}/{{ siot_binary }} mode=0755
+- name: fetch siot binary
+  get_url:
+    url: "{{ siot_download }}"
+    dest: "{{ siot_data_dir }}/siot.tar.gz"
+  register: fetch
+
+- name: extract siot
+  unarchive:
+    src: "{{ siot_data_dir }}/siot.tar.gz"
+    dest: "{{ siot_data_dir }}"
+    copy: no
+    owner: "{{ siot_user }}"
+    group: "{{ siot_user }}"
+  when: fetch.changed
+  register: extract
+  notify: restart siot
+
+- name: install siot binary
+  shell: |
+    EXTRACT_DIR={{ siot_data_dir }}/simpleiot-v{{ siot_version }}-linux-x86_64
+    cp $EXTRACT_DIR/siot /usr/local/bin/{{ siot_binary }}
+    rm -r $EXTRACT_DIR
+  when: extract.changed
   notify:
     - restart siot
     - enable siot

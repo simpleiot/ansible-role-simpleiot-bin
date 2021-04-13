@@ -1,8 +1,10 @@
 # we are on feature-flow-control-simple for now so we can
 # set control features
-siot_repo: https://github.com/simpleiot/simpleiot.git
-siot_version: master
+siot_version: 0.0.24
 siot_binary: siot
+siot_download:
+  "https://github.com/simpleiot/simpleiot/releases/download/v{{ siot_version
+  }}/simpleiot-v{{ siot_version }}-linux-x86_64.tar.gz"
 
 # recommend using a uuid for auth token. Can be generated
 # using the uuidgen utility (part of util-linux).
@@ -16,9 +18,12 @@ siot_user: "{{ siot_binary }}"
 siot_domain: siot.xyz.com
 siot_data_dir: /home/{{ siot_binary }}
 siot_bin_dir: /usr/local/bin
-siot_port: 8080
+siot_http_port: 8080
 siot_nats_port: 4222
 siot_nats_http_port: 8222
+
+# note the following must be changed from localhost to your URL
+# if you are using TLS certs for NATS
 siot_nats_url: nats://localhost:{{ siot_nats_port }}
 siot_nats_tls_timeout: 30
 
@@ -27,8 +32,3 @@ siot_influx_url: http://localhost:8086
 siot_influx_user: admin
 siot_influx_pass: fixme
 siot_influx_db: "{{ siot_binary }}"
-
-# twilio config -- set SID to "" to disable
-siot_twilio_sid: ""
-siot_twilio_auth_token: ""
-siot_twilio_from: "123-234-2342"
