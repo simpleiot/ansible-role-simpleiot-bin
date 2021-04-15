@@ -35,10 +35,12 @@
   notify: restart siot
 
 - name: install siot binary
-  shell: |
-    EXTRACT_DIR={{ siot_data_dir }}/simpleiot-v{{ siot_version }}-linux-x86_64
-    cp $EXTRACT_DIR/siot /usr/local/bin/{{ siot_binary }}
-    rm -r $EXTRACT_DIR
+  copy:
+    remote_src: yes
+    src: "{{ siot_data_dir}}/simpleiot-v{{ siot_version }}-linux-x86_64/siot"
+    dest: /usr/local/bin/{{ siot_binary }}
+    mode: "0755"
+    owner: "{{ siot_user }}"
   when: extract.changed
   notify:
     - restart siot
