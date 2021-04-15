@@ -4,17 +4,18 @@
 
 ```
     - name: SIOT service
-      role: siot
+      role: simpleiot-bin
       tags: siot
       vars:
         siot_binary: siot
-        siot_domain: iot.xyz.com
+        siot_auth_token: 816add8d-887b-498a-9558-f2ad85890390
+        siot_domain: portal.xyz.com
+        siot_http_port: 8080
         siot_user: caddy2
-        siot_influx_pass: <influxdb password>
-        siot_twilio_sid: <twilio sid>
-        siot_twilio_auth_token: <twilio auth token>
-        siot_twilio_from: <twilio phone #>
-
+        siot_nats_port: 4222
+        siot_nats_url: nats://{{siot_domain}}:{{ siot_nats_port }}
+        siot_nats_http_port: 8222
+        siot_influx_url: ""
 ```
 
 ## Other recommended services
