@@ -22,6 +22,7 @@
     url: "{{ siot_download }}"
     dest: "{{ siot_data_dir }}/siot.tar.gz"
   register: fetch
+  notify: restart siot
 
 - name: extract siot
   unarchive:
