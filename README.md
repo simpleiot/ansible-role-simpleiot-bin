@@ -15,7 +15,6 @@
         siot_nats_port: 4222
         siot_nats_url: nats://{{siot_domain}}:{{ siot_nats_port }}
         siot_nats_http_port: 8222
-        siot_influx_url: ""
 ```
 
 ## Other recommended services

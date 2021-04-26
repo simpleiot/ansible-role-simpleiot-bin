@@ -23,19 +23,6 @@ Environment=SIOT_NATS_TLS_KEY=/home/caddy2/.local/share/caddy/certificates/acme-
 Environment=SIOT_NATS_TLS_TIMEOUT={{ siot_nats_tls_timeout }}
 {% endif %}
 
-{% if siot_influx_url != "" %}
-Environment=SIOT_INFLUX_URL={{ siot_influx_url }}
-Environment=SIOT_INFLUX_USER={{ siot_influx_user }}
-Environment=SIOT_INFLUX_PASS={{ siot_influx_pass }}
-Environment=SIOT_INFLUX_DB={{ siot_influx_db }}
-{% endif %}
-
-{% if siot_twilio_sid != "" %}
-Environment=TWILIO_SID={{ siot_twilio_sid }}
-Environment=TWILIO_AUTH_TOKEN={{ siot_twilio_auth_token }}
-Environment=TWILIO_FROM={{ siot_twilio_from }}
-{% endif %}
-
 ; User and group the process will run as.
 User={{ siot_user }}
 Group={{ siot_user }}

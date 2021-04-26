@@ -1,6 +1,6 @@
 # we are on feature-flow-control-simple for now so we can
 # set control features
-siot_version: 0.0.27
+siot_version: 0.0.29
 siot_binary: siot
 siot_download:
   "https://github.com/simpleiot/simpleiot/releases/download/v{{ siot_version
