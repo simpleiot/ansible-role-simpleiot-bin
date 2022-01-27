@@ -16,6 +16,7 @@ Environment=SIOT_NATS_PORT={{ siot_nats_port }}
 Environment=SIOT_NATS_HTTP_PORT={{ siot_nats_http_port }}
 # below cannot be localhost because then certs fail
 Environment=SIOT_NATS_SERVER={{ siot_nats_url }}
+Environment=SIOT_NATS_WS_PORT={{ siot_nats_ws_port }}
 
 {% if siot_user == "caddy2" %}
 Environment=SIOT_NATS_TLS_CERT=/home/caddy2/.local/share/caddy/certificates/acme-v02.api.letsencrypt.org-directory/{{ siot_domain }}/{{ siot_domain }}.crt
