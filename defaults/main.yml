@@ -15,6 +15,9 @@ siot_tmp: "{{ playbook_dir }}/tmp/{{ siot_binary }}"
 # re-use caddy's TLS certs for the embedded NATS
 # in SIOT
 siot_user: "{{ siot_binary }}"
+# siot_domain is used if we try to share caddy TLS certs to do
+# NATS TLS. Generally it is easier to just use NATS over websockets
+# and let Caddy handle TLS.
 siot_domain: siot.xyz.com
 siot_data_dir: /home/{{ siot_binary }}
 siot_bin_dir: /usr/local/bin
