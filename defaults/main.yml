@@ -1,10 +1,11 @@
 # we are on feature-flow-control-simple for now so we can
 # set control features
-siot_version: 0.9.0
+siot_version: 0.12.3
 siot_binary: siot
+siot_architecture: linux-x86_64
 siot_download:
   "https://github.com/simpleiot/simpleiot/releases/download/v{{ siot_version
-  }}/simpleiot-v{{ siot_version }}-linux-x86_64.tar.gz"
+  }}/simpleiot-v{{ siot_version }}-{{siot_architecture}}.tar.gz"
 
 # recommend using a uuid for auth token. Can be generated
 # using the uuidgen utility (part of util-linux).
