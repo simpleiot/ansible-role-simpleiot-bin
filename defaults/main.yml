@@ -1,6 +1,6 @@
 # we are on feature-flow-control-simple for now so we can
 # set control features
-siot_version: 0.12.6
+siot_version: 0.14.9
 siot_binary: siot
 siot_architecture: linux-x86_64
 siot_download:
