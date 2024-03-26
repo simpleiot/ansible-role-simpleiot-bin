@@ -22,9 +22,10 @@ siot_user: "{{ siot_binary }}"
 siot_domain: siot.xyz.com
 siot_data_dir: /home/{{ siot_binary }}
 siot_bin_dir: /usr/local/bin
-siot_http_port: 8080
+siot_http_port: 8118
 siot_nats_port: 4222
 siot_nats_http_port: 8222
+siot_nats_ws_port: 9222
 
 # note the following must be changed from localhost to your URL
 # if you are using TLS certs for NATS
