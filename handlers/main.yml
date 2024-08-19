@@ -1,8 +1,8 @@
-- name: reload systemd
+- name: reload systemd siot-bin
   command: systemctl daemon-reload
 
-- name: restart siot
+- name: restart siot-bin
   service: name={{ siot_binary }} state=restarted
 
-- name: enable siot
+- name: enable siot-bin
   service: name={{ siot_binary }} state=started enabled=yes

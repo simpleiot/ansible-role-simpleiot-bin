@@ -22,7 +22,7 @@
     url: "{{ siot_download }}"
     dest: "{{ siot_data_dir }}/siot.tar.gz"
   register: fetch
-  notify: restart siot
+  notify: restart siot-bin
 
 - name: extract siot
   unarchive:
@@ -33,7 +33,7 @@
     group: "{{ siot_user }}"
   when: fetch.changed
   register: extract
-  notify: restart siot
+  notify: restart siot-bin
 
 - name: install siot binary
   copy:
@@ -44,13 +44,13 @@
     owner: "{{ siot_user }}"
   when: extract.changed
   notify:
-    - restart siot
-    - enable siot
+    - restart siot-bin
+    - enable siot-bin
 
 - name: install service file
   template:
     src=siot.service.j2 dest=/etc/systemd/system/{{ siot_binary }}.service
   notify:
-    - reload systemd
-    - restart siot
-    - enable siot
+    - reload systemd siot-bin
+    - restart siot-bin
+    - enable siot-bin
