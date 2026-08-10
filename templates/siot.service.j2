@@ -23,6 +23,12 @@ Environment=SIOT_NATS_TLS_CERT=/home/caddy2/.local/share/caddy/certificates/acme
 Environment=SIOT_NATS_TLS_KEY=/home/caddy2/.local/share/caddy/certificates/acme-v02.api.letsencrypt.org-directory/{{ siot_domain }}/{{ siot_domain }}.key
 Environment=SIOT_NATS_TLS_TIMEOUT={{ siot_nats_tls_timeout }}
 {% endif %}
+{% if siot_provisioning_src != "" %}
+# Provisioning files are applied at start-up and again whenever one of them
+# changes, so a configuration change needs no restart.
+Environment=SIOT_PROVISIONING_DIR={{ siot_provisioning_dir }}
+Environment=SIOT_PROVISIONING_INTERVAL={{ siot_provisioning_interval }}
+{% endif %}
 
 ; User and group the process will run as.
 User={{ siot_user }}

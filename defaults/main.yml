@@ -1,17 +1,20 @@
-# we are on feature-flow-control-simple for now so we can
-# set control features
-siot_version: 0.18.3
+siot_version: 0.23.1
 siot_binary: siot
 siot_architecture: linux-x86_64
+
+# Since v0.20 a release publishes bare executables rather than tarballs, so the
+# download is the binary itself and there is nothing to extract.
 siot_download:
   "https://github.com/simpleiot/simpleiot/releases/download/v{{ siot_version
-  }}/simpleiot-v{{ siot_version }}-{{siot_architecture}}.tar.gz"
+  }}/simpleiot-v{{ siot_version }}-{{ siot_architecture }}"
+# Downloaded under its release name so that changing siot_version always fetches
+# the new binary, then installed to siot_bin_dir.
+siot_download_dest: /root/simpleiot-v{{ siot_version }}-{{ siot_architecture }}
 
 # recommend using a uuid for auth token. Can be generated
 # using the uuidgen utility (part of util-linux).
 # If left "", token auth will be disabled.
 siot_auth_token: ""
-siot_tmp: "{{ playbook_dir }}/tmp/{{ siot_binary }}"
 # siot_user must be set to caddy2 user if you want
 # re-use caddy's TLS certs for the embedded NATS
 # in SIOT
@@ -32,8 +35,10 @@ siot_nats_ws_port: 9222
 siot_nats_url: nats://localhost:{{ siot_nats_port }}
 siot_nats_tls_timeout: 30
 
-# influxdb config. Set siot_influx_url to "" to disable
-siot_influx_url: http://localhost:8086
-siot_influx_user: admin
-siot_influx_pass: fixme
-siot_influx_db: "{{ siot_binary }}"
+# Provisioning. siot_provisioning_src is a directory in the playbook repo
+# holding YAML files that describe the configuration this instance should have.
+# SIOT applies them at start-up and again whenever one of them changes. Leave it
+# "" to configure the instance through the UI instead.
+siot_provisioning_src: ""
+siot_provisioning_dir: /etc/{{ siot_binary }}/provisioning
+siot_provisioning_interval: 60s

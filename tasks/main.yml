@@ -20,32 +20,73 @@
 - name: fetch siot binary
   get_url:
     url: "{{ siot_download }}"
-    dest: "{{ siot_data_dir }}/siot.tar.gz"
-  register: fetch
-  notify: restart siot-bin
+    dest: "{{ siot_download_dest }}"
+    mode: "0755"
 
-- name: extract siot
-  unarchive:
-    src: "{{ siot_data_dir }}/siot.tar.gz"
-    dest: "{{ siot_data_dir }}"
-    copy: no
-    owner: "{{ siot_user }}"
-    group: "{{ siot_user }}"
-  when: fetch.changed
-  register: extract
-  notify: restart siot-bin
-
+# Ansible installs through a temporary file and a rename, so replacing the
+# binary of a running service works and takes effect on the next restart.
 - name: install siot binary
   copy:
     remote_src: yes
-    src: "{{ siot_data_dir}}/simpleiot-v{{ siot_version }}-linux-x86_64/siot"
-    dest: /usr/local/bin/{{ siot_binary }}
+    src: "{{ siot_download_dest }}"
+    dest: "{{ siot_bin_dir }}/{{ siot_binary }}"
     mode: "0755"
-    owner: "{{ siot_user }}"
-  when: extract.changed
   notify:
     - restart siot-bin
     - enable siot-bin
+
+- name: create provisioning dir
+  file:
+    path: "{{ siot_provisioning_dir }}"
+    state: directory
+    owner: "{{ siot_user }}"
+    mode: "0750"
+  when: siot_provisioning_src != ""
+
+# SIOT watches the provisioning directory and applies a file when its contents
+# change, so a configuration change needs no restart.
+- name: install provisioning files
+  copy:
+    src: "{{ item }}"
+    dest: "{{ siot_provisioning_dir }}/{{ item | basename }}"
+    owner: "{{ siot_user }}"
+    mode: "0640"
+  with_fileglob: "{{ siot_provisioning_src }}/*.yml"
+  when: siot_provisioning_src != ""
+
+- name: list installed provisioning files
+  find:
+    paths: "{{ siot_provisioning_dir }}"
+    patterns: ["*.yml", "*.yaml"]
+  register: siot_provisioning_installed
+  when: siot_provisioning_src != ""
+
+# Removing a file from the playbook repo removes it from the server, so the repo
+# is the whole description of what provisioning applies. The nodes a removed
+# file created stay in the tree; use a `delete` list to remove those.
+- name: remove provisioning files no longer in the repo
+  file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ siot_provisioning_installed.files | default([]) }}"
+  loop_control:
+    label: "{{ item.path }}"
+  when:
+    - siot_provisioning_src != ""
+    - item.path | basename not in (query('fileglob', siot_provisioning_src +
+      '/*.yml') | map('basename') | list)
+
+# Parsing needs no running instance, so a file that does not parse fails the
+# play here rather than being reported later in the provisioning node. The check
+# treats an empty directory as an error, so it only runs when there are files.
+- name: check provisioning files parse
+  command:
+    "{{ siot_bin_dir }}/{{ siot_binary }} provision -dir {{
+    siot_provisioning_dir }} -check"
+  changed_when: false
+  when:
+    - siot_provisioning_src != ""
+    - query('fileglob', siot_provisioning_src + '/*.yml') | length > 0
 
 - name: install service file
   template:
