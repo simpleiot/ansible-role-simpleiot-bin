@@ -17,11 +17,17 @@
   with_items:
     - "{{ siot_data_dir }}"
 
+# The release host closes a connection now and then, so give it a few attempts
+# before ending the deploy at this task.
 - name: fetch siot binary
   get_url:
     url: "{{ siot_download }}"
     dest: "{{ siot_download_dest }}"
     mode: "0755"
+  register: siot_fetch
+  until: siot_fetch is succeeded
+  retries: 3
+  delay: 5
 
 # Ansible installs through a temporary file and a rename, so replacing the
 # binary of a running service works and takes effect on the next restart.
