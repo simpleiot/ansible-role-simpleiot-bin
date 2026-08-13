@@ -42,3 +42,11 @@ siot_nats_tls_timeout: 30
 siot_provisioning_src: ""
 siot_provisioning_dir: /etc/{{ siot_binary }}/provisioning
 siot_provisioning_interval: 60s
+
+# Additional environment variables for the service, written into the unit file
+# as Environment= lines. Useful for SIOT settings this role has no dedicated
+# variable for, e.g.:
+#
+# siot_extra_env:
+#   SIOT_STORE_MAX_MSGS_PER_SUBJECT: "90000"
+siot_extra_env: {}

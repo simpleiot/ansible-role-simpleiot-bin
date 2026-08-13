@@ -29,6 +29,9 @@ Environment=SIOT_NATS_TLS_TIMEOUT={{ siot_nats_tls_timeout }}
 Environment=SIOT_PROVISIONING_DIR={{ siot_provisioning_dir }}
 Environment=SIOT_PROVISIONING_INTERVAL={{ siot_provisioning_interval }}
 {% endif %}
+{% for name, value in siot_extra_env.items() %}
+Environment={{ name }}={{ value }}
+{% endfor %}
 
 ; User and group the process will run as.
 User={{ siot_user }}
