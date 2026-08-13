@@ -12,10 +12,25 @@
     home: "{{ siot_data_dir }}"
   when: siot_user != "caddy2"
 
-- name: Create directories
-  file: path={{ item }} state=directory owner={{ siot_user }} mode='0770'
-  with_items:
-    - "{{ siot_data_dir }}"
+- name: create data dir
+  file:
+    path: "{{ siot_data_dir }}"
+    state: directory
+    owner: "{{ siot_user }}"
+    group: "{{ siot_user }}"
+    mode: "0770"
+
+# siot_user can change over the life of a deployment; switching it to caddy2 to
+# share Caddy's TLS certificates with NATS is the usual reason. The store files
+# already in the data directory have to follow, or the service cannot open its
+# own database. Modes are left alone, so this only settles ownership.
+- name: own the data dir contents
+  file:
+    path: "{{ siot_data_dir }}"
+    state: directory
+    owner: "{{ siot_user }}"
+    group: "{{ siot_user }}"
+    recurse: yes
 
 - name: look for a cached siot release
   stat:
@@ -49,11 +64,24 @@
     - restart siot-bin
     - enable siot-bin
 
+# The parent is created along the way when it is missing, which leaves it owned
+# by root and closed to the service. Naming it here keeps it traversable by
+# siot_user, and keeps it that way when siot_user changes.
+- name: create provisioning parent dir
+  file:
+    path: "{{ siot_provisioning_dir | dirname }}"
+    state: directory
+    owner: "{{ siot_user }}"
+    group: "{{ siot_user }}"
+    mode: "0750"
+  when: siot_provisioning_src != ""
+
 - name: create provisioning dir
   file:
     path: "{{ siot_provisioning_dir }}"
     state: directory
     owner: "{{ siot_user }}"
+    group: "{{ siot_user }}"
     mode: "0750"
   when: siot_provisioning_src != ""
 
@@ -64,6 +92,7 @@
     src: "{{ item }}"
     dest: "{{ siot_provisioning_dir }}/{{ item | basename }}"
     owner: "{{ siot_user }}"
+    group: "{{ siot_user }}"
     mode: "0640"
   with_fileglob: "{{ siot_provisioning_src }}/*.yml"
   when: siot_provisioning_src != ""

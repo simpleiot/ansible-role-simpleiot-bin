@@ -31,8 +31,34 @@ require some customization -- pull requests are welcome.
 
 ## Using Caddy2 TLS certs with SimpleIoT
 
-This role can be configured to use caddy2 TLS certs for NATS by setting the user
-to `caddy2`.
+Setting `siot_user: caddy2` runs Simple IoT as the user Caddy runs as, which
+gives it read access to the certificates Caddy already obtains, and points the
+NATS listener at the certificate for `siot_domain`:
+
+```yaml
+siot_user: caddy2
+siot_domain: portal.xyz.com
+siot_nats_url: nats://{{ siot_domain }}:{{ siot_nats_port }}
+```
+
+`siot_nats_url` is how Simple IoT's own clients reach the server, so with TLS in
+play it has to be the name on the certificate rather than `localhost`, which is
+what the certificate would not match.
+
+Two things follow from sharing the certificate this way. Simple IoT reads the
+files when it starts, so it keeps serving the previous certificate after Caddy
+renews, until the service restarts; a periodic restart, or a deploy, brings the
+new one into use. And `siot_user` becomes part of the deployment's state: the
+role settles ownership of the data directory on each run so that a change of
+user carries the existing store with it.
+
+A `siot_domain` that Caddy does not serve leaves Simple IoT with no certificate
+to read and the NATS listener fails to start, so give it a name that appears in
+the Caddyfile.
+
+The alternative is to leave the user alone and reverse proxy the NATS WebSocket
+port (`siot_nats_ws_port`) through Caddy under a name of its own, which keeps
+TLS in one place and needs no certificate sharing.
 
 ## Versions
 
