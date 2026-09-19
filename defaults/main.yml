@@ -56,6 +56,11 @@ siot_nats_tls_timeout: 30
 # "" to configure the instance through the UI instead.
 siot_provisioning_src: ""
 siot_provisioning_dir: /etc/{{ siot_binary }}/provisioning
+# Run the provisioning files through Jinja on the way to the server, so a file
+# can carry a value the playbook holds rather than repeating it -- the hash of
+# an enrollment token kept in a vault, for example. Leave it false for files
+# that carry Jinja syntax of their own, which templating would try to resolve.
+siot_provisioning_template: false
 siot_provisioning_interval: 60s
 
 # Additional environment variables for the service, written into the unit file

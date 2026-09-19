@@ -110,7 +110,24 @@
     group: "{{ siot_user }}"
     mode: "0640"
   with_fileglob: "{{ siot_provisioning_src }}/*.yml"
-  when: siot_provisioning_src != ""
+  when:
+    - siot_provisioning_src != ""
+    - not siot_provisioning_template
+
+# The same files, with Jinja resolved, for a deployment whose provisioning
+# carries a value from the playbook. The server sees the result, so the check
+# below and SIOT itself read the rendered file either way.
+- name: install provisioning templates
+  template:
+    src: "{{ item }}"
+    dest: "{{ siot_provisioning_dir }}/{{ item | basename }}"
+    owner: "{{ siot_user }}"
+    group: "{{ siot_user }}"
+    mode: "0640"
+  with_fileglob: "{{ siot_provisioning_src }}/*.yml"
+  when:
+    - siot_provisioning_src != ""
+    - siot_provisioning_template
 
 - name: list installed provisioning files
   find:

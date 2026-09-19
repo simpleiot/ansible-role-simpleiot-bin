@@ -141,6 +141,13 @@ does not parse fails the play rather than being reported later in the instance's
 of them changes, so a configuration change is a commit followed by a playbook
 run, with no restart involved.
 
+Setting `siot_provisioning_template: true` runs the files through Jinja on the
+way to the server, so one can carry a value the playbook holds rather than
+repeating it -- the hash of an enrollment token kept in a vault, for example.
+The server sees the rendered file, so `siot provision -check` and Simple IoT
+itself read the same thing. Leave it false for files that carry Jinja syntax of
+their own.
+
 Files apply in lexical order, so the usual `10-`, `20-` prefixes express which
 one goes first. Nodes are matched by description, which is what makes applying a
 file repeatedly do what applying it once did. Renaming a description, in the
