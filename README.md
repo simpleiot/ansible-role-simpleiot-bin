@@ -60,6 +60,41 @@ The alternative is to leave the user alone and reverse proxy the NATS WebSocket
 port (`siot_nats_ws_port`) through Caddy under a name of its own, which keeps
 TLS in one place and needs no certificate sharing.
 
+## Hardening
+
+The service is installed the way `siot install` sets one up, so a deployment
+made with this role and one made with the binary's own installer hold the same
+ground:
+
+- The auth token is written to `siot_env_file` (`siot.env` in the data
+  directory) with mode `0600` and read through `EnvironmentFile=`, rather than
+  into the unit file, which every user on the machine can read.
+- The data directory, which holds the store, the device key, and the token, is
+  created mode `0700`.
+- The unit carries `NoNewPrivileges=true` and, with `siot_sandbox` left on, the
+  systemd sandboxing directives: the service sees the rest of the system
+  read-only and writes only `siot_read_write_paths`, which is the data directory
+  by default. `systemd-analyze security siot` shows what the unit still allows.
+
+Two settings cover the cases where a deployment needs more than that.
+`siot_read_write_paths` takes further directories, for example `siot_bin_dir`
+for a deployment that runs `siot update`. `siot_protect_home` is `read-only`
+rather than the installer's `true`, since sharing Caddy's certificates reads
+them out of Caddy's home directory and `siot_data_dir` can live under `/home`.
+
+A client that needs hardware -- a serial port, GPIO, IIO, CAN -- is allowed it
+in a drop-in:
+
+```sh
+sudo systemctl edit siot
+```
+
+```ini
+[Service]
+SupplementaryGroups=dialout
+DeviceAllow=/dev/ttyUSB0 rw
+```
+
 ## Versions
 
 `siot_version` decides what is installed. A release publishes a bare executable

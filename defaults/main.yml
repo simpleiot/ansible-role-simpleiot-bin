@@ -1,4 +1,4 @@
-siot_version: 0.23.1
+siot_version: 0.28.0
 siot_binary: siot
 siot_architecture: linux-x86_64
 
@@ -14,7 +14,12 @@ siot_download_dest: /root/simpleiot-v{{ siot_version }}-{{ siot_architecture }}
 # recommend using a uuid for auth token. Can be generated
 # using the uuidgen utility (part of util-linux).
 # If left "", token auth will be disabled.
+# The token is written to siot_env_file rather than the unit file, which is
+# world readable.
 siot_auth_token: ""
+# Environment file the service reads the token from, readable by siot_user
+# only. This is where `siot install` puts it as well.
+siot_env_file: "{{ siot_data_dir }}/siot.env"
 # siot_user must be set to caddy2 user if you want
 # re-use caddy's TLS certs for the embedded NATS
 # in SIOT
@@ -50,3 +55,17 @@ siot_provisioning_interval: 60s
 # siot_extra_env:
 #   SIOT_STORE_MAX_MSGS_PER_SUBJECT: "90000"
 siot_extra_env: {}
+
+# systemd sandboxing, matching what `siot install` generates for a system
+# service. Set to false for a deployment that needs the service to reach more
+# of the system than the directories below.
+siot_sandbox: true
+# /home is read-only rather than hidden, because sharing Caddy's certificates
+# with NATS reads them out of Caddy's home directory, and siot_data_dir can
+# live under /home as well.
+siot_protect_home: read-only
+# The paths the service may write. The data directory holds the store, the
+# device key, and the token. `siot update` replaces the binary in place, so a
+# deployment that uses it adds siot_bin_dir here.
+siot_read_write_paths:
+  - "{{ siot_data_dir }}"

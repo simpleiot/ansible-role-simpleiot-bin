@@ -8,9 +8,12 @@ Wants=network-online.target systemd-networkd-wait-online.service
 Restart=always
 RestartSec=10
 
+# SIOT_AUTH_TOKEN comes from here rather than an Environment= line, since the
+# unit file is world readable and this file is not.
+EnvironmentFile={{ siot_env_file }}
+
 Environment=SIOT_DATA={{ siot_data_dir }}
 Environment=SIOT_HTTP_PORT={{ siot_http_port }}
-Environment=SIOT_AUTH_TOKEN={{ siot_auth_token }}
 
 Environment=SIOT_NATS_PORT={{ siot_nats_port }}
 Environment=SIOT_NATS_HTTP_PORT={{ siot_nats_http_port }}
@@ -36,6 +39,21 @@ Environment={{ name }}={{ value }}
 ; User and group the process will run as.
 User={{ siot_user }}
 Group={{ siot_user }}
+
+NoNewPrivileges=true
+{% if siot_sandbox %}
+# The service sees the rest of the system read-only and writes only the paths
+# below, matching what `siot install` generates for a system service. A client
+# that needs hardware (serial, GPIO, IIO, CAN) needs the device allowed in a
+# drop-in; see `systemctl edit {{ siot_binary }}`.
+ProtectSystem=strict
+ProtectHome={{ siot_protect_home }}
+PrivateTmp=true
+ProtectKernelTunables=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+ReadWritePaths={{ siot_read_write_paths | join(' ') }}
+{% endif %}
 
 ExecStart={{ siot_bin_dir }}/{{ siot_binary }}
 
