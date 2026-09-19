@@ -30,10 +30,20 @@ siot_user: "{{ siot_binary }}"
 siot_domain: siot.xyz.com
 siot_data_dir: /home/{{ siot_binary }}
 siot_bin_dir: /usr/local/bin
-siot_http_port: 8118
+# Ports. Left "", a port is not passed to Simple IoT at all and its own default
+# applies, which is what these settings were repeating: through v0.27 the web UI
+# was on 8118, NATS monitoring on 8222, and the NATS WebSocket on 9222. Since
+# v0.28 the web UI is one above the NATS port and monitoring two above it, the
+# WebSocket listener takes a port Simple IoT finds for itself, and
+# SIOT_NATS_HTTP_PORT and SIOT_NATS_WS_PORT are gone. Set one to move that
+# listener off the default; a reverse proxy in front of the web UI needs the
+# number either way.
+siot_http_port: ""
 siot_nats_port: 4222
-siot_nats_http_port: 8222
-siot_nats_ws_port: 9222
+siot_nats_http_port: ""
+siot_nats_ws_port: ""
+# v0.28 and later; moves NATS monitoring, which listens on localhost
+siot_nats_monitor_port: ""
 
 # note the following must be changed from localhost to your URL
 # if you are using TLS certs for NATS

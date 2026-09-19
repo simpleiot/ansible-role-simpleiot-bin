@@ -14,8 +14,23 @@
         siot_user: caddy2
         siot_nats_port: 4222
         siot_nats_url: nats://{{siot_domain}}:{{ siot_nats_port }}
-        siot_nats_http_port: 8222
 ```
+
+## Ports
+
+`siot_nats_port` is the one port a deployment usually names, since Simple IoT
+places its other listeners relative to it: since v0.28 the web UI is one above
+it and NATS monitoring two above it, with monitoring and the NATS WebSocket on
+localhost. Left `""`, `siot_http_port`, `siot_nats_http_port`, and
+`siot_nats_ws_port` are not passed to Simple IoT, so its own defaults apply. Set
+`siot_http_port` to move the web UI somewhere else, and tell the reverse proxy
+in front of it the same number.
+
+Simple IoT through v0.27 put the web UI on 8118, NATS monitoring on 8222, and
+the NATS WebSocket on 9222, which is what this role used to pass explicitly, so
+a deployment on one of those releases lands where it always did. On v0.28 the
+settings behind `siot_nats_http_port` and `siot_nats_ws_port` are gone, and
+`siot_nats_monitor_port` moves monitoring instead.
 
 ## Other recommended services
 
