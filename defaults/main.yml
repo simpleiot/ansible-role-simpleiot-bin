@@ -71,6 +71,12 @@ siot_provisioning_interval: 60s
 #   SIOT_STORE_MAX_MSGS_PER_SUBJECT: "90000"
 siot_extra_env: {}
 
+# Memory ceiling for the service, in megabytes, set as systemd's MemoryMax so
+# the kernel stops the service growing past it. GOMEMLIMIT is set to 80% of it,
+# so the Go garbage collector works harder as the heap nears the ceiling rather
+# than the service being killed on reaching it. 0 leaves both unset.
+siot_memory_max_mb: 0
+
 # systemd sandboxing, matching what `siot install` generates for a system
 # service. Set to false for a deployment that needs the service to reach more
 # of the system than the directories below.

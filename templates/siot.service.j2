@@ -41,6 +41,10 @@ Environment=SIOT_NATS_TLS_TIMEOUT={{ siot_nats_tls_timeout }}
 Environment=SIOT_PROVISIONING_DIR={{ siot_provisioning_dir }}
 Environment=SIOT_PROVISIONING_INTERVAL={{ siot_provisioning_interval }}
 {% endif %}
+{% if siot_memory_max_mb | int > 0 %}
+MemoryMax={{ siot_memory_max_mb }}M
+Environment=GOMEMLIMIT={{ (siot_memory_max_mb | int * 0.8) | int }}MiB
+{% endif %}
 {% for name, value in siot_extra_env.items() %}
 Environment={{ name }}={{ value }}
 {% endfor %}
