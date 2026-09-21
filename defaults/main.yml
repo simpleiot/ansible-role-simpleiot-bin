@@ -77,6 +77,14 @@ siot_extra_env: {}
 # than the service being killed on reaching it. 0 leaves both unset.
 siot_memory_max_mb: 0
 
+# Memory protected for the service, in megabytes, set as systemd's MemoryLow.
+# While Simple IoT uses less than this, the kernel reclaims memory from other
+# services first when memory runs short. A cgroup's protection is limited to
+# its parent's, so the role gives system.slice the same MemoryLow through a
+# drop-in; a second service that needs protection on the same host would need
+# the slice's value raised to cover both. 0 leaves both unset.
+siot_memory_low_mb: 0
+
 # systemd sandboxing, matching what `siot install` generates for a system
 # service. Set to false for a deployment that needs the service to reach more
 # of the system than the directories below.

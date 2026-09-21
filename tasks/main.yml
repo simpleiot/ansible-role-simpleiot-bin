@@ -171,6 +171,33 @@
     - restart siot-bin
     - enable siot-bin
 
+# MemoryLow on the service protects it only as far as system.slice is
+# protected, so the slice is given the same amount.
+- name: create system.slice drop-in dir
+  file:
+    path: /etc/systemd/system/system.slice.d
+    state: directory
+    mode: "0755"
+  when: siot_memory_low_mb | int > 0
+
+- name: protect system.slice memory for siot
+  copy:
+    dest: /etc/systemd/system/system.slice.d/{{ siot_binary }}-memory-low.conf
+    mode: "0644"
+    content: |
+      # managed by ansible -- siot-bin role
+      [Slice]
+      MemoryLow={{ siot_memory_low_mb }}M
+  when: siot_memory_low_mb | int > 0
+  notify: reload systemd siot-bin
+
+- name: remove system.slice memory protection for siot
+  file:
+    path: /etc/systemd/system/system.slice.d/{{ siot_binary }}-memory-low.conf
+    state: absent
+  when: siot_memory_low_mb | int == 0
+  notify: reload systemd siot-bin
+
 # The handlers above start the service only when something changed, so a run
 # that failed before they ran would otherwise leave it stopped on every later
 # run. This task keeps it running and enabled either way.
