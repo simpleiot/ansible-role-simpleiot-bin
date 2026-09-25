@@ -170,3 +170,13 @@
     - reload systemd siot-bin
     - restart siot-bin
     - enable siot-bin
+
+# The handlers above start the service only when something changed, so a run
+# that failed before they ran would otherwise leave it stopped on every later
+# run. This task keeps it running and enabled either way.
+- name: start siot
+  systemd:
+    name: "{{ siot_binary }}"
+    state: started
+    enabled: yes
+    daemon_reload: yes
